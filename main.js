@@ -40,8 +40,11 @@
     });
   }
 
+  var loader = document.getElementById("loader");
+
   if (reduce || typeof gsap === "undefined") {
     // Reduced motion / no GSAP: reveal everything statically.
+    if (loader) loader.remove();
     document.querySelectorAll("[data-reveal]").forEach(function (el) { el.classList.add("in"); });
     document.querySelectorAll("[data-load], .line-mask .line").forEach(function (el) {
       el.style.opacity = "1"; el.style.transform = "none";
@@ -51,10 +54,49 @@
 
   gsap.registerPlugin(ScrollTrigger);
 
+  var finePointer = window.matchMedia("(pointer: fine)").matches;
+
+  /* ---------- Lenis inertia scroll ---------- */
+  var lenis = null;
+  if (typeof Lenis !== "undefined") {
+    lenis = new Lenis({ duration: 1.1, easing: function (t) { return 1 - Math.pow(1 - t, 3); } });
+    lenis.on("scroll", ScrollTrigger.update);
+    gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+    gsap.ticker.lagSmoothing(0);
+    // Glide to in-page anchors instead of jumping.
+    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        var target = document.querySelector(a.getAttribute("href"));
+        if (!target) return;
+        e.preventDefault();
+        lenis.scrollTo(target, { offset: a.getAttribute("href") === "#top" ? 0 : -70, duration: 1.4 });
+      });
+    });
+  }
+
+  /* ---------- Preloader curtain ---------- */
+  var intro = gsap.timeline({ defaults: { ease: "power3.out" }, paused: true });
+  if (loader) {
+    if (lenis) lenis.stop();
+    gsap.timeline({
+      onComplete: function () {
+        loader.remove();
+        if (lenis) lenis.start();
+      }
+    })
+      .fromTo(".loader-mark",
+        { opacity: 0, letterSpacing: "0.6em" },
+        { opacity: 1, letterSpacing: "0.42em", duration: 0.9, ease: "power2.out" }, 0.15)
+      .to(".loader-mark", { opacity: 0, duration: 0.4, ease: "power2.in" }, 1.25)
+      .to(loader, { yPercent: -100, duration: 0.9, ease: "power4.inOut" }, 1.45)
+      .add(function () { intro.play(); }, 1.55);
+  } else {
+    intro.play();
+  }
+
   /* ---------- Hero load-in ---------- */
   gsap.set("[data-load]", { opacity: 0 });
   gsap.set(".line-mask .line", { yPercent: 110 });
-  var intro = gsap.timeline({ defaults: { ease: "power3.out" } });
   intro
     .to(".line-mask .line", { yPercent: 0, duration: 1.0, stagger: 0.12 }, 0.1)
     .to("[data-load='0']", { opacity: 1, duration: 0.7 }, 0.3)
@@ -95,6 +137,55 @@
       hero.addEventListener("mouseleave", function () { imgX(0); glowX(0); glowY(0); });
     }
   }
+
+  /* ---------- Custom cursor ring (fine pointers only) ---------- */
+  var cursor = document.getElementById("cursor");
+  if (cursor && finePointer) {
+    var curX = gsap.quickTo(cursor, "x", { duration: 0.35, ease: "power3.out" });
+    var curY = gsap.quickTo(cursor, "y", { duration: 0.35, ease: "power3.out" });
+    var cursorShown = false;
+    window.addEventListener("mousemove", function (e) {
+      if (!cursorShown) {
+        cursorShown = true;
+        gsap.set(cursor, { x: e.clientX, y: e.clientY });
+        gsap.to(cursor, { opacity: 1, duration: 0.3 });
+      }
+      curX(e.clientX); curY(e.clientY);
+    });
+    document.addEventListener("mouseleave", function () { gsap.to(cursor, { opacity: 0, duration: 0.3 }); cursorShown = false; });
+    document.addEventListener("mouseover", function (e) {
+      cursor.classList.toggle("is-link", !!e.target.closest("a, button, [role='button'], summary"));
+    });
+    window.addEventListener("mousedown", function () { cursor.classList.add("is-down"); });
+    window.addEventListener("mouseup", function () { cursor.classList.remove("is-down"); });
+  }
+
+  /* ---------- Magnetic buttons (fine pointers only) ---------- */
+  if (finePointer) {
+    document.querySelectorAll(".btn").forEach(function (btn) {
+      var bx = gsap.quickTo(btn, "x", { duration: 0.4, ease: "power3.out" });
+      var by = gsap.quickTo(btn, "y", { duration: 0.4, ease: "power3.out" });
+      btn.addEventListener("mousemove", function (e) {
+        var r = btn.getBoundingClientRect();
+        bx((e.clientX - (r.left + r.width / 2)) * 0.22);
+        by((e.clientY - (r.top + r.height / 2)) * 0.3);
+      });
+      btn.addEventListener("mouseleave", function () { bx(0); by(0); });
+    });
+  }
+
+  /* ---------- Stat count-ups ---------- */
+  document.querySelectorAll("[data-count]").forEach(function (el) {
+    var end = parseInt(el.getAttribute("data-count"), 10);
+    var obj = { v: 0 };
+    el.textContent = "0";
+    gsap.to(obj, {
+      v: end, duration: 1.8, ease: "power2.out",
+      snap: { v: 1 },
+      onUpdate: function () { el.textContent = String(Math.round(obj.v)); },
+      scrollTrigger: { trigger: el, start: "top 88%", once: true }
+    });
+  });
 
   /* ---------- Scroll reveals ---------- */
   ScrollTrigger.batch("[data-reveal]", {
