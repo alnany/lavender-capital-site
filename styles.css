@@ -377,7 +377,16 @@ p { margin: 0; }
 .field-err { font-size: 0.8125rem; color: #f2b8c6; }
 .field.invalid input, .field.invalid textarea { border-color: #f2b8c6; }
 .contact-form .btn { grid-column: 1 / -1; justify-self: start; }
+.contact-form .btn[disabled] { opacity: 0.55; pointer-events: none; }
 .form-note { grid-column: 1 / -1; font-size: 0.8125rem; color: var(--muted); }
+.form-topic {
+  grid-column: 1 / -1; font-size: 0.875rem; color: var(--accent);
+  border-left: 2px solid var(--accent-dim); padding-left: 0.75rem;
+}
+.hp { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.form-done { grid-column: 1 / -1; padding: 2rem 0 1rem; }
+.form-done-title { font-size: 1.25rem; font-weight: 500; color: var(--text); margin-bottom: 0.6rem; }
+.form-done-sub { font-size: 0.9375rem; color: var(--muted); }
 @media (max-width: 900px) {
   .contact { grid-template-columns: 1fr; }
   .contact-form { grid-template-columns: 1fr; }
