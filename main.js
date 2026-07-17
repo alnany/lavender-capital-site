@@ -1,154 +1,142 @@
+/* Lavender Capital — motion & interaction */
 (function () {
   "use strict";
-  var TABS = ["overview", "lavender", "janys", "team", "contact"];
-  var TITLES = {
-    overview: "Lavender Capital — Web3 Venture Capital & Digital Asset Advisory | Hong Kong",
-    lavender: "Lavender Capital — Web3 & Blockchain Venture Capital",
-    janys: "Janys Capital — Digital Asset M&A, Tokenization & Capital Markets Advisory",
-    team: "Team — Lavender Capital & Janys Capital",
-    contact: "Contact — Lavender Capital & Janys Capital"
-  };
 
-  var pages = document.querySelectorAll("[data-page]");
-  var tabs = document.querySelectorAll("[data-tab-target]");
-  var navTabs = document.querySelectorAll(".nav-link");
-  var nav = document.querySelector(".nav");
-  var mobileMenuToggle = document.getElementById("mobileMenuToggle");
-  var mobilePanel = document.getElementById("mobilePanel");
-  var menuOpenIcon = document.getElementById("menuOpenIcon");
-  var menuCloseIcon = document.getElementById("menuCloseIcon");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  function closeMobileMenu() {
-    mobilePanel.classList.remove("open");
-    mobileMenuToggle.setAttribute("aria-expanded", "false");
-    menuOpenIcon.classList.remove("hidden");
-    menuCloseIcon.classList.add("hidden");
-  }
+  /* ---------- Nav scrolled state (IntersectionObserver, no scroll listener) ---------- */
+  var nav = document.getElementById("nav");
+  var sentinel = document.createElement("div");
+  sentinel.style.cssText = "position:absolute;top:0;height:1px;width:1px;";
+  document.body.prepend(sentinel);
+  new IntersectionObserver(function (entries) {
+    nav.classList.toggle("scrolled", !entries[0].isIntersecting);
+  }).observe(sentinel);
 
-  function openTab(tabName, pushHash) {
-    if (TABS.indexOf(tabName) === -1) tabName = "overview";
-    pages.forEach(function (page) { page.classList.toggle("active", page.dataset.page === tabName); });
-    navTabs.forEach(function (tab) { tab.classList.toggle("active", tab.dataset.tabTarget === tabName); });
-    document.title = TITLES[tabName] || TITLES.overview;
-    closeMobileMenu();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    if (pushHash !== false) {
-      if (tabName === "overview") history.replaceState(null, "", window.location.pathname);
-      else history.replaceState(null, "", "#" + tabName);
-    }
-    requestAnimationFrame(revealVisible);
-  }
-
-  tabs.forEach(function (tab) {
-    tab.addEventListener("click", function () {
-      var target = this.getAttribute("data-tab-target");
-      if (target) openTab(target);
-    });
-  });
-
-  window.addEventListener("hashchange", function () {
-    openTab((window.location.hash || "#overview").slice(1), false);
-  });
-
-  mobileMenuToggle.addEventListener("click", function () {
-    var isOpen = mobilePanel.classList.toggle("open");
-    mobileMenuToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    menuOpenIcon.classList.toggle("hidden", isOpen);
-    menuCloseIcon.classList.toggle("hidden", !isOpen);
-  });
-
-  /* ---------- Nav scroll state ---------- */
-  var lastY = 0;
-  window.addEventListener("scroll", function () {
-    var y = window.scrollY;
-    if ((y > 12) !== (lastY > 12)) nav.classList.toggle("scrolled", y > 12);
-    lastY = y;
-  }, { passive: true });
-
-  /* ---------- Scroll reveal ---------- */
-  var revealEls = document.querySelectorAll(".reveal");
-  var io = null;
-  if ("IntersectionObserver" in window) {
-    io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+  /* ---------- Contact form -> mailto compose ---------- */
+  var form = document.getElementById("enquiry");
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var ok = true;
+      ["f-name", "f-email", "f-brief"].forEach(function (id) {
+        var input = document.getElementById(id);
+        var field = input.closest(".field");
+        var err = field.querySelector(".field-err");
+        var valid = input.checkValidity() && input.value.trim().length > 0;
+        field.classList.toggle("invalid", !valid);
+        err.hidden = valid;
+        if (!valid) ok = false;
       });
-    }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
-  }
-  function revealVisible() {
-    revealEls.forEach(function (el) {
-      if (el.classList.contains("in")) return;
-      if (io && el.offsetParent !== null) io.observe(el);
-      else if (!io) el.classList.add("in");
+      if (!ok) return;
+      var name = document.getElementById("f-name").value.trim();
+      var email = document.getElementById("f-email").value.trim();
+      var brief = document.getElementById("f-brief").value.trim();
+      var body = "Name: " + name + "\nEmail: " + email + "\n\n" + brief;
+      window.location.href =
+        "mailto:info@lavendercapital.vc?subject=" +
+        encodeURIComponent("Enquiry — " + name) +
+        "&body=" + encodeURIComponent(body);
     });
   }
-  /* stagger children of grids */
-  document.querySelectorAll("[data-stagger]").forEach(function (wrap) {
-    Array.prototype.forEach.call(wrap.children, function (child, i) {
-      child.style.setProperty("--d", (i * 110) + "ms");
-    });
-  });
-  revealVisible();
 
-  /* ---------- Card spotlight ---------- */
-  var fine = window.matchMedia("(pointer: fine)").matches;
-  if (fine) {
-    document.querySelectorAll(".card, .mandate-card, .member-card").forEach(function (card) {
-      card.addEventListener("pointermove", function (e) {
-        var r = card.getBoundingClientRect();
-        card.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100) + "%");
-        card.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100) + "%");
+  if (reduce || typeof gsap === "undefined") {
+    // Reduced motion / no GSAP: reveal everything statically.
+    document.querySelectorAll("[data-reveal]").forEach(function (el) { el.classList.add("in"); });
+    document.querySelectorAll("[data-load], .line-mask .line").forEach(function (el) {
+      el.style.opacity = "1"; el.style.transform = "none";
+    });
+    return;
+  }
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ---------- Hero load-in ---------- */
+  gsap.set("[data-load]", { opacity: 0 });
+  gsap.set(".line-mask .line", { yPercent: 110 });
+  var intro = gsap.timeline({ defaults: { ease: "power3.out" } });
+  intro
+    .to(".line-mask .line", { yPercent: 0, duration: 1.0, stagger: 0.12 }, 0.1)
+    .to("[data-load='0']", { opacity: 1, duration: 0.7 }, 0.3)
+    .to("[data-load='2'].hero-visual", { opacity: 1, duration: 1.1 }, 0.35)
+    .to("[data-load='3'], [data-load='4']", { opacity: 1, duration: 0.8, stagger: 0.12 }, 0.7)
+    .set("[data-load]", { clearProps: "opacity" });
+
+  /* ---------- Scroll reveals ---------- */
+  ScrollTrigger.batch("[data-reveal]", {
+    start: "top 86%",
+    once: true,
+    onEnter: function (batch) {
+      batch.forEach(function (el, i) {
+        setTimeout(function () { el.classList.add("in"); }, i * 90);
       });
-    });
-  }
-
-  /* ---------- Contact form ---------- */
-  var optionChips = document.querySelectorAll(".option-chip");
-  var selectedAreasInput = document.getElementById("selected_areas");
-  var form = document.getElementById("contactForm");
-  var formMessage = document.getElementById("formMessage");
-  var successState = document.getElementById("successState");
-  var selectedAreas = [];
-
-  optionChips.forEach(function (chip) {
-    chip.addEventListener("click", function () {
-      var value = this.getAttribute("data-chip");
-      var index = selectedAreas.indexOf(value);
-      if (index >= 0) { selectedAreas.splice(index, 1); this.classList.remove("active"); }
-      else { selectedAreas.push(value); this.classList.add("active"); }
-      selectedAreasInput.value = selectedAreas.join(", ");
-    });
+    }
   });
 
-  function val(id) { return document.getElementById(id).value.trim(); }
-
-  document.getElementById("openMailClient").addEventListener("click", function () {
-    formMessage.innerHTML = "";
-    var required = ["first_name", "last_name", "email", "role_type", "primary_interest", "brief"];
-    var missing = required.some(function (id) { return !val(id); });
-    if (missing) {
-      formMessage.innerHTML = '<div class="alert error">Please complete all required fields before submitting.</div>';
-      formMessage.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
-    }
-    var subject = encodeURIComponent("Enquiry — " + val("first_name") + " " + val("last_name") + (val("organisation") ? " (" + val("organisation") + ")" : ""));
-    var body = encodeURIComponent(
-      "Name: " + val("first_name") + " " + val("last_name") + "\n" +
-      "Email: " + val("email") + "\n" +
-      "Organisation: " + (val("organisation") || "—") + "\n" +
-      "Reaching out as: " + val("role_type") + "\n" +
-      "Primary interest: " + val("primary_interest") + "\n" +
-      "Collaboration areas: " + (selectedAreas.join(", ") || "—") + "\n\n" +
-      val("brief")
+  /* ---------- Manifesto: word-by-word scrub ---------- */
+  var mani = document.querySelector("[data-words]");
+  if (mani) {
+    var words = mani.textContent.trim().split(/\s+/);
+    mani.textContent = "";
+    words.forEach(function (w, i) {
+      var s = document.createElement("span");
+      s.className = "w";
+      s.textContent = w;
+      mani.appendChild(s);
+      if (i < words.length - 1) mani.appendChild(document.createTextNode(" "));
+    });
+    gsap.fromTo(mani.querySelectorAll(".w"),
+      { opacity: 0.14 },
+      {
+        opacity: 1, stagger: 0.06, ease: "none",
+        scrollTrigger: { trigger: mani, start: "top 78%", end: "bottom 45%", scrub: true }
+      }
     );
-    window.location.href = "mailto:info@lavendercapital.vc?subject=" + subject + "&body=" + body;
-    form.classList.add("hidden");
-    successState.classList.remove("hidden");
+  }
+
+  /* ---------- Image / numeral parallax ---------- */
+  document.querySelectorAll("[data-parallax]").forEach(function (el) {
+    var amount = parseFloat(el.getAttribute("data-parallax")) || 0;
+    gsap.fromTo(el, { yPercent: -amount }, {
+      yPercent: amount, ease: "none",
+      scrollTrigger: { trigger: el.parentElement, start: "top bottom", end: "bottom top", scrub: true }
+    });
   });
 
-  /* ---------- Initial route: #hash or legacy ?tab= ---------- */
-  var params = new URLSearchParams(window.location.search);
-  var initial = (window.location.hash || "").slice(1) || params.get("tab") || "overview";
-  if (initial !== "overview") openTab(initial, true);
-  else revealVisible();
+  /* ---------- Pinned arm panels (desktop only) ---------- */
+  ScrollTrigger.matchMedia({
+    "(min-width: 900px)": function () {
+      var arms = gsap.utils.toArray(".arm");
+      if (arms.length < 2) return;
+      // Pin the first panel while the second scrolls over it.
+      ScrollTrigger.create({
+        trigger: arms[0],
+        start: "top top",
+        endTrigger: arms[1],
+        end: "top top",
+        pin: true,
+        pinSpacing: false
+      });
+      gsap.fromTo(arms[0].querySelector(".arm-inner"),
+        { opacity: 1, scale: 1 },
+        {
+          opacity: 0.35, scale: 0.97, ease: "none",
+          scrollTrigger: { trigger: arms[1], start: "top bottom", end: "top top", scrub: true }
+        }
+      );
+    }
+  });
+
+  /* ---------- Nav active link ---------- */
+  document.querySelectorAll(".nav-links a").forEach(function (link) {
+    var id = link.getAttribute("href");
+    var target = document.querySelector(id);
+    if (!target) return;
+    ScrollTrigger.create({
+      trigger: target,
+      start: "top center",
+      end: "bottom center",
+      onToggle: function (self) { link.classList.toggle("active", self.isActive); }
+    });
+  });
 })();
