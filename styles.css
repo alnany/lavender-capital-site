@@ -347,8 +347,8 @@ p { margin: 0; }
 @media (prefers-reduced-motion: no-preference) {
   [data-reveal] { opacity: 0; transform: translateY(26px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
   [data-reveal].in { opacity: 1; transform: none; }
-  [data-load] { opacity: 0; }
-  .line-mask .line { transform: translateY(110%); }
+  /* hero load-in initial states are owned by GSAP (inline), not CSS,
+     so a finished timeline can never be re-hidden by a stylesheet rule */
 }
 @media (prefers-reduced-motion: reduce) {
   [data-reveal], [data-load], .line-mask .line { opacity: 1 !important; transform: none !important; }
