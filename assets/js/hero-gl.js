@@ -126,28 +126,12 @@
   /* ---- state ---- */
   var running = false, started = false, revealed = false;
   var t0 = performance.now();
-  var mouse = { x: 0.34, y: 0.3 }, target = { x: 0.34, y: 0.3 };
-  var mstr = 0, mstrTarget = 0;
-  var finePointer = window.matchMedia("(pointer: fine)").matches;
-
-  if (finePointer) {
-    var hero = document.querySelector(".hero") || figure;
-    window.addEventListener("mousemove", function (e) {
-      var r = figure.getBoundingClientRect();
-      target.x = (e.clientX - r.left) / Math.max(r.width, 1);
-      target.y = (e.clientY - r.top) / Math.max(r.height, 1);
-      var inHero = e.clientY < (hero.getBoundingClientRect().bottom);
-      mstrTarget = inHero ? 1 : 0;
-    }, { passive: true });
-    document.addEventListener("mouseleave", function () { mstrTarget = 0; });
-  }
+  var mouse = { x: 0.34, y: 0.3 };
+  var mstr = 0;
 
   function frame(now) {
     if (!running) return;
     resize();
-    mouse.x += (target.x - mouse.x) * 0.07;
-    mouse.y += (target.y - mouse.y) * 0.07;
-    mstr += (mstrTarget - mstr) * 0.05;
     gl.uniform2f(U.u_res, canvas.width, canvas.height);
     gl.uniform2f(U.u_texres, texW, texH);
     gl.uniform1f(U.u_time, (now - t0) / 1000);
