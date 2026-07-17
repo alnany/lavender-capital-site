@@ -13,9 +13,47 @@
     nav.classList.toggle("scrolled", !entries[0].isIntersecting);
   }).observe(sentinel);
 
-  /* ---------- Contact form -> mailto compose ---------- */
+  /* ---------- Contact form: server-side send on lavendercapital.vc, mailto fallback elsewhere ---------- */
   var form = document.getElementById("enquiry");
   if (form) {
+    var SERVER_SEND =
+      /(^|\.)lavendercapital\.vc$/.test(location.hostname) && typeof fetch !== "undefined";
+    var topicField = document.getElementById("f-topic");
+    var topicNote = document.getElementById("form-topic");
+    var formNote = document.getElementById("form-note");
+
+    if (!SERVER_SEND && formNote) {
+      formNote.textContent = "Opens your mail client with everything prefilled.";
+    }
+
+    // CTA buttons routing into the form with a preset topic.
+    document.querySelectorAll("[data-topic]").forEach(function (a) {
+      a.addEventListener("click", function () {
+        var t = a.getAttribute("data-topic");
+        if (topicField) topicField.value = t;
+        if (topicNote) {
+          topicNote.textContent = "Regarding: " + t;
+          topicNote.hidden = false;
+        }
+      });
+    });
+
+    var mailtoSend = function (name, email, brief, topic) {
+      var body = "Name: " + name + "\nEmail: " + email + "\n\n" + brief;
+      window.location.href =
+        "mailto:info@lavendercapital.vc?subject=" +
+        encodeURIComponent((topic || "Enquiry") + " - " + name) +
+        "&body=" + encodeURIComponent(body);
+    };
+
+    var showDone = function () {
+      form.innerHTML =
+        '<div class="form-done">' +
+        "<p class=\"form-done-title\">Thank you — your enquiry has been received.</p>" +
+        "<p class=\"form-done-sub\">We respond to every serious enquiry within two business days. Strictly confidential.</p>" +
+        "</div>";
+    };
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var ok = true;
@@ -32,11 +70,39 @@
       var name = document.getElementById("f-name").value.trim();
       var email = document.getElementById("f-email").value.trim();
       var brief = document.getElementById("f-brief").value.trim();
-      var body = "Name: " + name + "\nEmail: " + email + "\n\n" + brief;
-      window.location.href =
-        "mailto:info@lavendercapital.vc?subject=" +
-        encodeURIComponent("Enquiry - " + name) +
-        "&body=" + encodeURIComponent(body);
+      var topic = topicField ? topicField.value : "";
+
+      if (!SERVER_SEND) {
+        mailtoSend(name, email, brief, topic);
+        return;
+      }
+
+      var btn = form.querySelector('button[type="submit"]');
+      var label = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Sending\u2026";
+      fetch("/contact.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          brief: brief,
+          topic: topic,
+          company: (document.getElementById("f-company") || { value: "" }).value
+        })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d || !d.ok) throw new Error("send failed");
+          showDone();
+        })
+        .catch(function () {
+          // Server hiccup: restore the button and fall back to the mail client.
+          btn.disabled = false;
+          btn.textContent = label;
+          mailtoSend(name, email, brief, topic);
+        });
     });
   }
 
