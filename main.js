@@ -121,35 +121,6 @@
       .fromTo(".hero-sheen",
         { xPercent: -260 },
         { xPercent: 900, duration: 2.6, ease: "power2.inOut" });
-    // Pointer-follow parallax (fine pointers only).
-    if (window.matchMedia("(pointer: fine)").matches) {
-      var hero = document.querySelector(".hero");
-      var imgX = gsap.quickTo(heroImg, "x", { duration: 0.9, ease: "power3.out" });
-      var glowX = gsap.quickTo(".hero-glow", "x", { duration: 1.3, ease: "power3.out" });
-      var glowY = gsap.quickTo(".hero-glow", "y", { duration: 1.3, ease: "power3.out" });
-      hero.addEventListener("mousemove", function (e) {
-        var nx = (e.clientX / window.innerWidth) - 0.5;
-        var ny = (e.clientY / window.innerHeight) - 0.5;
-        imgX(nx * -14);
-        glowX(nx * 34);
-        glowY(ny * 26);
-      });
-      hero.addEventListener("mouseleave", function () { imgX(0); glowX(0); glowY(0); });
-    }
-  }
-
-  /* ---------- Magnetic buttons (fine pointers only) ---------- */
-  if (finePointer) {
-    document.querySelectorAll(".btn").forEach(function (btn) {
-      var bx = gsap.quickTo(btn, "x", { duration: 0.4, ease: "power3.out" });
-      var by = gsap.quickTo(btn, "y", { duration: 0.4, ease: "power3.out" });
-      btn.addEventListener("mousemove", function (e) {
-        var r = btn.getBoundingClientRect();
-        bx((e.clientX - (r.left + r.width / 2)) * 0.22);
-        by((e.clientY - (r.top + r.height / 2)) * 0.3);
-      });
-      btn.addEventListener("mouseleave", function () { bx(0); by(0); });
-    });
   }
 
   /* ---------- Stat count-ups ---------- */
