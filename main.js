@@ -35,7 +35,7 @@
       var body = "Name: " + name + "\nEmail: " + email + "\n\n" + brief;
       window.location.href =
         "mailto:info@lavendercapital.vc?subject=" +
-        encodeURIComponent("Enquiry — " + name) +
+        encodeURIComponent("Enquiry - " + name) +
         "&body=" + encodeURIComponent(body);
     });
   }
