@@ -59,7 +59,42 @@
     .to(".line-mask .line", { yPercent: 0, duration: 1.0, stagger: 0.12 }, 0.1)
     .to("[data-load='0']", { opacity: 1, duration: 0.7 }, 0.3)
     .to("[data-load='2'].hero-visual", { opacity: 1, duration: 1.1 }, 0.35)
+    .fromTo(".hero-visual", { clipPath: "inset(0% 0% 14% 0%)" },
+      { clipPath: "inset(0% 0% 0% 0%)", duration: 1.2, ease: "power3.inOut" }, 0.35)
     .to("[data-load='3'], [data-load='4']", { opacity: 1, duration: 0.8, stagger: 0.12 }, 0.7);
+
+  /* ---------- Hero ambient motion ---------- */
+  var heroImg = document.querySelector(".hero-visual img");
+  if (heroImg) {
+    // Slow Ken Burns drift — barely perceptible, keeps the glass alive.
+    gsap.fromTo(heroImg, { scale: 1.04 }, {
+      scale: 1.11, duration: 26, ease: "sine.inOut", yoyo: true, repeat: -1
+    });
+    // Lavender glow breathes.
+    gsap.to(".hero-glow", {
+      opacity: 0.55, duration: 7, ease: "sine.inOut", yoyo: true, repeat: -1
+    });
+    // Periodic light sweep across the glass.
+    gsap.timeline({ repeat: -1, repeatDelay: 7, delay: 2.2 })
+      .fromTo(".hero-sheen",
+        { xPercent: -260 },
+        { xPercent: 900, duration: 2.6, ease: "power2.inOut" });
+    // Pointer-follow parallax (fine pointers only).
+    if (window.matchMedia("(pointer: fine)").matches) {
+      var hero = document.querySelector(".hero");
+      var imgX = gsap.quickTo(heroImg, "x", { duration: 0.9, ease: "power3.out" });
+      var glowX = gsap.quickTo(".hero-glow", "x", { duration: 1.3, ease: "power3.out" });
+      var glowY = gsap.quickTo(".hero-glow", "y", { duration: 1.3, ease: "power3.out" });
+      hero.addEventListener("mousemove", function (e) {
+        var nx = (e.clientX / window.innerWidth) - 0.5;
+        var ny = (e.clientY / window.innerHeight) - 0.5;
+        imgX(nx * -14);
+        glowX(nx * 34);
+        glowY(ny * 26);
+      });
+      hero.addEventListener("mouseleave", function () { imgX(0); glowX(0); glowY(0); });
+    }
+  }
 
   /* ---------- Scroll reveals ---------- */
   ScrollTrigger.batch("[data-reveal]", {
