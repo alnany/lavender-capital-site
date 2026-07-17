@@ -138,28 +138,6 @@
     }
   }
 
-  /* ---------- Custom cursor ring (fine pointers only) ---------- */
-  var cursor = document.getElementById("cursor");
-  if (cursor && finePointer) {
-    var curX = gsap.quickTo(cursor, "x", { duration: 0.35, ease: "power3.out" });
-    var curY = gsap.quickTo(cursor, "y", { duration: 0.35, ease: "power3.out" });
-    var cursorShown = false;
-    window.addEventListener("mousemove", function (e) {
-      if (!cursorShown) {
-        cursorShown = true;
-        gsap.set(cursor, { x: e.clientX, y: e.clientY });
-        gsap.to(cursor, { opacity: 1, duration: 0.3 });
-      }
-      curX(e.clientX); curY(e.clientY);
-    });
-    document.addEventListener("mouseleave", function () { gsap.to(cursor, { opacity: 0, duration: 0.3 }); cursorShown = false; });
-    document.addEventListener("mouseover", function (e) {
-      cursor.classList.toggle("is-link", !!e.target.closest("a, button, [role='button'], summary"));
-    });
-    window.addEventListener("mousedown", function () { cursor.classList.add("is-down"); });
-    window.addEventListener("mouseup", function () { cursor.classList.remove("is-down"); });
-  }
-
   /* ---------- Magnetic buttons (fine pointers only) ---------- */
   if (finePointer) {
     document.querySelectorAll(".btn").forEach(function (btn) {
