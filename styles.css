@@ -140,12 +140,13 @@ p { margin: 0; }
 .hero { position: relative; min-height: 100dvh; display: flex; flex-direction: column; }
 .hero-grid {
   flex: 1;
+  position: relative; z-index: 2;
   max-width: var(--container); margin: 0 auto; width: 100%;
   padding: 0 var(--gutter);
-  display: grid; grid-template-columns: 7fr 5fr; gap: clamp(2rem, 5vw, 5rem);
+  display: grid; grid-template-columns: 1fr;
   align-items: center;
 }
-.hero-copy { padding-top: 68px; }
+.hero-copy { padding-top: 68px; max-width: 46rem; }
 .hero-eyebrow {
   font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.18em;
   text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem;
@@ -155,8 +156,14 @@ p { margin: 0; }
 .line { display: block; }
 .hero-sub { max-width: 32rem; color: var(--muted); font-size: 1.0625rem; margin-top: 1.5rem; }
 .hero-ctas { display: flex; gap: 1rem; margin-top: 2.25rem; flex-wrap: wrap; }
-.hero-visual { margin: 0; height: min(78dvh, 760px); overflow: hidden; position: relative; }
-.hero-visual img { width: 100%; height: 106%; object-fit: cover; will-change: transform; transition: opacity 0.8s ease; }
+.hero-visual { margin: 0; position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+.hero-visual::after {
+  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(12, 11, 16, 0.88) 0%, rgba(12, 11, 16, 0.6) 38%, rgba(12, 11, 16, 0.16) 68%, rgba(12, 11, 16, 0.3) 100%),
+    linear-gradient(180deg, rgba(12, 11, 16, 0.5) 0%, transparent 26%, transparent 72%, rgba(12, 11, 16, 0.62) 100%);
+}
+.hero-visual img { width: 100%; height: 100%; object-fit: cover; will-change: transform; transition: opacity 0.8s ease; }
 .hero-visual.gl-on img { opacity: 0; }
 .hero-gl {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -175,6 +182,7 @@ p { margin: 0; }
   mix-blend-mode: screen;
 }
 .hero-foot {
+  position: relative; z-index: 2;
   border-top: 1px solid var(--line);
   max-width: var(--container); margin: 0 auto; width: 100%;
   padding: 1.1rem var(--gutter);
@@ -182,9 +190,8 @@ p { margin: 0; }
   color: var(--muted); font-size: 0.875rem;
 }
 @media (max-width: 900px) {
-  .hero-grid { grid-template-columns: 1fr; align-items: start; padding-top: 90px; }
+  .hero-grid { grid-template-columns: 1fr; align-items: center; padding-top: 90px; }
   .hero-copy { padding-top: 0; }
-  .hero-visual { height: 46vh; order: -1; margin: 0 calc(-1 * var(--gutter)); }
   .hero-foot { flex-wrap: wrap; gap: 0.75rem 1.5rem; }
 }
 
