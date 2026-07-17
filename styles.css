@@ -1,12 +1,12 @@
 /* Lavender Capital — editorial ink redesign, 2026 */
 @font-face {
-  font-family: 'Clash Display';
-  src: url('assets/fonts/clash-display-500.woff2') format('woff2');
+  font-family: 'General Sans';
+  src: url('assets/fonts/general-sans-500.woff2') format('woff2');
   font-weight: 500; font-style: normal; font-display: swap;
 }
 @font-face {
-  font-family: 'Clash Display';
-  src: url('assets/fonts/clash-display-600.woff2') format('woff2');
+  font-family: 'General Sans';
+  src: url('assets/fonts/general-sans-600.woff2') format('woff2');
   font-weight: 600; font-style: normal; font-display: swap;
 }
 @font-face {
@@ -35,7 +35,7 @@
   --muted: #9a96a4;
   --accent: #b3a1ea;
   --accent-dim: rgba(179, 161, 234, 0.16);
-  --display: 'Clash Display', ui-sans-serif, system-ui, sans-serif;
+  --display: 'General Sans', ui-sans-serif, system-ui, sans-serif;
   --body: 'Satoshi', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --mono: ui-monospace, 'SF Mono', Menlo, monospace;
   --container: 1400px;
