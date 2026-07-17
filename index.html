@@ -49,6 +49,11 @@
   </script>
 </head>
 <body>
+  <div class="loader" id="loader" aria-hidden="true">
+    <span class="loader-mark">Lavender Capital</span>
+  </div>
+  <noscript><style>.loader{display:none}</style></noscript>
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="nav" id="nav">
@@ -98,6 +103,21 @@
     <!-- ============ FIRM / MANIFESTO ============ -->
     <section class="manifesto" id="firm">
       <p class="manifesto-text" data-words>Our investment experience informs our advisory practice. Our advisory relationships generate proprietary deal flow. One firm, compounding market intelligence with execution capability.</p>
+
+      <dl class="stat-strip" data-reveal>
+        <div class="stat">
+          <dd class="stat-num"><span data-count="100">100</span><span class="stat-suffix">+</span></dd>
+          <dt class="stat-label">Investments &amp; incubations</dt>
+        </div>
+        <div class="stat">
+          <dd class="stat-num"><span data-count="4">4</span></dd>
+          <dt class="stat-label">Years of market cycles</dt>
+        </div>
+        <div class="stat">
+          <dd class="stat-num"><span data-count="3">3</span></dd>
+          <dt class="stat-label">Offices worldwide</dt>
+        </div>
+      </dl>
 
       <ol class="firm-rows">
         <li class="firm-row" data-reveal>
@@ -297,6 +317,7 @@
     </div>
   </footer>
 
+  <script src="assets/js/lenis.min.js" defer></script>
   <script src="assets/js/gsap.min.js" defer></script>
   <script src="assets/js/ScrollTrigger.min.js" defer></script>
   <script src="/main.js" defer></script>
