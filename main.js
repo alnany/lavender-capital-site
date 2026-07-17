@@ -59,8 +59,7 @@
     .to(".line-mask .line", { yPercent: 0, duration: 1.0, stagger: 0.12 }, 0.1)
     .to("[data-load='0']", { opacity: 1, duration: 0.7 }, 0.3)
     .to("[data-load='2'].hero-visual", { opacity: 1, duration: 1.1 }, 0.35)
-    .to("[data-load='3'], [data-load='4']", { opacity: 1, duration: 0.8, stagger: 0.12 }, 0.7)
-    .set("[data-load]", { clearProps: "opacity" });
+    .to("[data-load='3'], [data-load='4']", { opacity: 1, duration: 0.8, stagger: 0.12 }, 0.7);
 
   /* ---------- Scroll reveals ---------- */
   ScrollTrigger.batch("[data-reveal]", {
