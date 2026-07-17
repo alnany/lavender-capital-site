@@ -32,7 +32,7 @@
   <link rel="preload" href="assets/fonts/satoshi-400.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/img/hero-2400.webp" as="image" imagesrcset="assets/img/hero-1600.webp 1600w, assets/img/hero-2400.webp 2400w, assets/img/hero-3200.webp 3200w" imagesizes="100vw" />
 
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/styles.css?v=2" />
 
   <script type="application/ld+json">
   {
@@ -175,7 +175,7 @@
                 <li>Institutions seeking practical routes into Web3 within their risk and compliance standards.</li>
                 <li>GPs, foundations, and large token holders seeking structured liquidity or secondary solutions.</li>
               </ul>
-              <a class="btn btn-primary" href="mailto:info@lavendercapital.vc?subject=Advisory%20mandate%20-%20Janys%20Capital">Submit a mandate</a>
+              <a class="btn btn-primary" href="#contact" data-topic="Advisory mandate — Janys Capital">Submit a mandate</a>
             </div>
             <figure class="arm-visual">
               <img src="assets/img/tower.webp" alt="Dark skyscraper facade at violet dusk in a financial district" width="1789" height="1200" loading="lazy" data-parallax="-5" />
@@ -285,6 +285,12 @@
       </div>
 
       <form class="contact-form" id="enquiry" data-reveal novalidate>
+        <p class="form-topic" id="form-topic" hidden></p>
+        <input type="hidden" id="f-topic" name="topic" value="" />
+        <div class="hp" aria-hidden="true">
+          <label for="f-company">Company (leave blank)</label>
+          <input id="f-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+        </div>
         <div class="field">
           <label for="f-name">Name</label>
           <input id="f-name" name="name" type="text" autocomplete="name" required />
@@ -302,7 +308,7 @@
           <p class="field-err" hidden>Please tell us briefly about your situation.</p>
         </div>
         <button class="btn btn-primary" type="submit">Send enquiry</button>
-        <p class="form-note">Opens your mail client with everything prefilled.</p>
+        <p class="form-note" id="form-note">Strictly confidential — we reply within two business days.</p>
       </form>
     </section>
 
@@ -319,6 +325,6 @@
   <script src="assets/js/lenis.min.js" defer></script>
   <script src="assets/js/gsap.min.js" defer></script>
   <script src="assets/js/ScrollTrigger.min.js" defer></script>
-  <script src="/main.js" defer></script>
+  <script src="/main.js?v=2" defer></script>
 </body>
 </html>
